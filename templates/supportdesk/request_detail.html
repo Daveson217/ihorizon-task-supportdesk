@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center px-1">
+        <div class="col-md-12 pt-4">
+            <a class="btn btn-sm btn-light mb-1" href="{% url 'request_list' %}"><i class="bi bi-arrow-left"></i></a>
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="d-flex flex-row w-100">
+                        <h5 class="font-weight-bolder">
+                        {{ request.summary }}
+                            {% if request.is_high_priority %}<span class="badge badge-pill badge-danger text-capitalize">High Priority</span>{% endif %}
+                        </h5>                    
+                    </div>    
+                    <div class="d-flex flex-row my-2">
+                        <small class="text-secondary mr-5"><i class="bi bi-calendar"></i> Created 3 days ago</small>
+                        <small class="text-secondary"><i class="bi bi-person-fill"></i> Assigned to {{ user.first_name}} {{ user.last_name }}</small>
+                    </div>        
+                    
+                    <div class="mt-4">
+                        {{ request.description }}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    {% if request.is_completed %}
+                        <span class="badge badge-pill badge-success text-capitalize">Completed</span>
+                    {% else %}
+                        <button class="btn btn-sm btn-info" data-id={{ request.id }} ><i class="bi bi-person-fill"></i> Mark as completed</button>
+                    {% endif %}
+                </div>
+
+            </div>
+        
+        </div>
+    </div>
+</div>
+{% endblock %}

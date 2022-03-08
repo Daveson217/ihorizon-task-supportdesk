@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center px-1">
+        <div class="col-md-10 request-items">
+            <p class="h5 mb-2">            
+               {% if user.is_staff %}
+                    All my open requests
+                {% else %} 
+                    My Requests
+                {% endif %} 
+            </p>
+
+
+            {% for request in requests %}
+                <div class="p-2 mb-4 border border-primary">
+                    <div class="d-flex flex-row w-100">
+                        <p class="font-weight-bold">
+                            {{ request.summary }}
+                            {% if request.is_high_priority %}<span class="badge badge-pill badge-danger text-capitalize">High Priority</span>{% endif %}
+                            
+                            {% if user.is_staff %}
+                            <a href="{% url 'request_detail' request.id %}" class="link-primary"><i class="bi bi-arrow-up-right-square-fill"></i></a>{% endif %}
+                        </p>
+                        
+                        {% if request.is_completed %}
+                            <div class="ml-auto">
+                                <span class="badge badge-pill badge-success text-capitalize">Completed</span>
+                            </div>
+                        {% else %}
+                            <div class="ml-auto">
+                                <span class="badge badge-pill badge-primary text-capitalize">In progress</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="w-75 text-truncate">
+                        {{ request.description }}
+                    </div>                
+                    
+
+                    {% if user.is_staff %}
+                        <small class="my-2 font-weight-bolder text-muted">Quick actions</small>
+                        <div class="d-flex flex-row flex-wrap">                            
+                            <div class="dropdown mb-1">
+                                <button class="btn btn-sm btn-outline-primary mr-2 dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-fill"></i> Reassign to someone
+                                </button>
+                                
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    {% for agent in users %}
+                                        <li><a class="dropdown-item" href="{% url 'reassign_agent' request.id agent.id %}" data-id={{ agent.id }}>{{ agent.first_name }} {{ agent.last_name }} </a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                  
+
+                            <button class="btn btn-sm btn-outline-info mark-as-complete mb-1" data-id={{ request.id }} data-url="{% url 'mark_completed' request.id %}">
+                                <i class="bi bi-check2"></i> 
+                                {% if request.is_completed %}
+                                    Completed!
+                                {% else %}
+                                Mark as completed
+                                {% endif %}
+                            </button>
+                        </div>
+                    {% else %} 
+                        <div class="d-flex flex-row mr-2 mt-2">
+                            <small class="text-secondary mr-5"><i class="bi bi-calendar"></i> Created {{ request.count_days }} days ago</small>
+                            <small class="text-secondary"><i class="bi bi-person-fill"></i> Assigned to {{ request.user_assigned_to.first_name}} {{ request.user_assigned_to.last_name}} </small>
+                        </div>
+                    {% endif %} 
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block javascript %}
+<script>
+
+    $('.request-items').on("click", ".mark-as-complete", function () {
+        var btn = $(this);
+        const requestId = btn.attr('data-id');
+        console.log(requestId);
+
+        $.ajax({
+            url: btn.attr("data-url"),
+            type: 'get',
+            dataType: 'json',
+            beforeSend: function () {      
+                         
+            },
+            success: function (data) {
+                if (data['response'] === 'completed') {
+                    btn.html('<i class="bi bi-check2"></i>Completed!');
+                } else {
+                    // Error
+
+                }
+            }
+        });
+    });        
+        
+        
+</script>
+{% endblock javascript %}
+
+
+
